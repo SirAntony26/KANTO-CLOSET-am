@@ -1,0 +1,70 @@
+// KANTO CLOSET AM - Full React App Entry Point
+
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import './index.css';
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+
+// App.jsx
+
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import AdminLogin from './admin/AdminLogin';
+import Dashboard from './admin/Dashboard';
+import { AuthProvider, useAuth } from './firebase/AuthContext';
+
+function PrivateRoute({ children, adminOnly }) {
+  const { user, isAdmin } = useAuth();
+  if (!user) return <Navigate to="/login" />;
+  if (adminOnly && !isAdmin) return <Navigate to="/" />;
+  return children;
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/dashboard" element={<PrivateRoute adminOnly={true}><Dashboard /></PrivateRoute>} />
+        </Routes>
+      </Router>
+    </AuthProvider>
+  );
+}
+
+export default App;
+
+// firebase/config.js
+
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBJnc7Zzds4N4UC2ye4P6lptSKr5j2R6jk",
+  authDomain: "kanto-closet-am.firebaseapp.com",
+  projectId: "kanto-closet-am",
+  storageBucket: "kanto-closet-am.firebasestorage.app",
+  messagingSenderId: "306428525334",
+  appId: "1:306428525334:web:11a01b02d057fbd6ccee37",
+  measurementId: "G-GYWXSZE6X1"
+};
+
+const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const storage = getStorage(app);
